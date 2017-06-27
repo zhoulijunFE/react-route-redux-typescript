@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist/",
+        "sourceMap": true,
+        "noImplicitAny": true,
+        "module": "commonjs",
+        "target": "es5",  //UglifyJsPlugin支持
+        "jsx": "react",
+        "lib": ["es2017", "dom"] //Promise引入
+    },
+    "include": [
+        "./src/**/*",
+        "./custom.d.ts"
+    ]
+}

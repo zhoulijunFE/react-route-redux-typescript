@@ -1,0 +1,14 @@
+owners {
+    not-inherit: false
+    approvers: [
+        "gaolw",
+        "mengqy",
+        "wury",
+    ]
+    members: [
+        "shangwx",
+        "xiongchao",
+        "zhaowh",
+        "zhoulj"
+    ]
+}
