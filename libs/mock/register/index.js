@@ -1,6 +1,6 @@
-var MockUtil = require("jgfe-lib/mock");
+var MockUtil = require("../../index");
 var mockUtil = new MockUtil()
 
-mockUtil.addRouter('get', '/mgt/register', require("./register"), 200, true)
+mockUtil.addRouter('get', '/register', require("./register"), 200, true)
 
 module.exports = mockUtil.getRouters();
