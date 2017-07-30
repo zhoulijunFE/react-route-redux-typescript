@@ -17,6 +17,7 @@ npm install cross-env
 npm start
 ```
 Open your browser and visit http://127.0.0.1:4000
+<<<<<<< HEAD
 
 ## 技术选择
 react + redux + react-route + typescript + webpack2
@@ -259,3 +260,5 @@ force: false,
 - https://fakefish.github.io/react-webpack-cookbook/index.html
 - https://mrshi.gitbooks.io/survivejs_webpack_chinese/chapter3-3.html
 - 打包原理: https://cnodejs.org/topic/5867bb575eac96bb04d3e301
+=======
+>>>>>>> 55c1ffe256a501855f4d896c591f3be1a113c2f5
