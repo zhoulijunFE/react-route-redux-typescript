@@ -5,10 +5,6 @@
 - 支持webpack
 - 支持fetch mock.
 
-## Environment Support
-- chrome、safari、firefox、Internet Explorer 9+ (with polyfills)
-
-
 ## Development
 
 ```
@@ -17,7 +13,6 @@ npm install cross-env
 npm start
 ```
 Open your browser and visit http://127.0.0.1:4000
-<<<<<<< HEAD
 
 ## 技术选择
 react + redux + react-route + typescript + webpack2
@@ -86,83 +81,72 @@ READNE.md
 "compilerOptions": {
 "outDir": "./dist/",        //输出目录
 "sourceMap": true,          //生成相应的.map文件
-"module": "commonjs",       //模块编译支持commonjs(node写法)
-"target": "es5",            //被编译目标版本
+"target": "es5",            //被编译目标js版本
+"module": "commonjs",       //模块编译支持commonjs(node+es5)
+"moduleResolution": "Node", //处理模块(Classic)
 "jsx": "react",             //.tsx文件里支持JSX
 "lib": ["es6", "dom"]       //编译时需要引入的库文件的列表
+"noImplicitAny": true,      //支持any
 "noUnusedLocals": true,     //若有未使用的局部变量则抛错
 "noUnusedParameters": true  //若有未使用的参数则抛错
-"noImplicitAny": true,      //支持any
 "strictNullChecks": true    //null和undefined，只允许用它们自己和any来赋值（有个例外，undefined可以赋值到void）
 },
 "include": [                  //编译包含路径
 "./src/**/*",               // **/递归匹配任意子目录, *或.*，那么仅有支持的文件扩展名类型被包含在内（.ts、.tsx、.d.ts)
 "./custom.d.ts"
 ],
-"exclude": [
-//排除文件,默认outDir、node_modules
+"exclude": [//排除文件,默认outDir、node_modules
 ]
 }
 ```
 - ts声明方式:
-- 1)  package.json @types引入: https://www.npmjs.com/package/@types/react(替换对应)
-```
-判断types中是否存在:
-npm install typings --global
-typings search --name react(替换存在的项目)
-```
-- 2) declare module * (declare var * ) 声明模块(js变量)
+- package.json @types引入: https://www.npmjs.com/package/@types/react
 
-- typescrip详细讲解
-- https://www.tslang.cn/
-
-## react-router引入
-- 路由基本
-```
-routes() {
-return <Route path='/' component={Index}>
-{RegisterRoute}
-</Route>
-}
-调用:
-<Provider store={store}>
-<Router history={hashHistory} routes={this.routes()}></Router>
-</Provider>
-```
-- 模块化路由按需加载(webpack会require独立分片文件, 实现按路由拆分文件)
-```
-const route =
-(<Route path="register"
-getComponent={(location:any, callback:any) => {
-require.ensure([], function (require: any) {
-const Index = require('./index')['default'];
-callback(null, Index.App);
-}, 'register');---> webpack: chunkFilename: [name]
-}}
-getChildRoutes={(location:any, callback: any) => {
-require.ensure([], function (require:any) {
-const Index = require('./index')['default'];
-callback(null, Index.routes);
-}, 'register');
-}}>
-</Route>);
-export default route;
-```
-- http://blog.zhaiyifan.cn/2016/11/16/pwa-react-p2/
-- http://robin-front.github.io/2016/04/18/react-router%E5%8A%A8%E6%80%81%E8%B7%AF%E7%94%B1%E4%B8%8EWebpack%E5%88%86%E7%89%87thunks/
-
-- react-router详细讲解
-- https://react-guide.github.io/react-router-cn/docs/Introduction.html
-- 原理: http://zhenhua-lee.github.io/react/history.html
+- declare module * (declare var * ) 声明模块(js变量)
 
 ## webpack
-- 编译ts、tsx-->读取tsconfig.js                      
+- 从0到1 webpack搭建过程
+- 解析依赖树入口文件、编译后文件
+- 网页入口文件index.html
+- 编译 tsx、jsx、es6
+- 编译 scss
+- 编译 font、image
+- 编译 json
+- 模块化包装合并资源
+- 引入静态资源到相应 html 页面
+- 文件 hash 后缀，处理缓存
+- 压缩 js、css
+- 全局替换指定字符串
+- css 添加浏览器兼容前缀
+- js源码打入
+- 开发、测试、生产、英文版环境配置
+- html title、static path、favicon.ico动态配置
+- 按需加载合并 js、css
+- css内嵌js-独立引入(遗留异步模块化)
+- 本地接口模拟服务
+- 语法检查: tslint、eslint
+
+- 解析入口文件、编译后文件
 ```
-{ test: /\.tsx?$/, use: 'ts-loader' }, //ts loader  早于 js loader
+entry: {
+index: path.resolve(__dirname, './src/entry.tsx')
+}
+
+output: {
+filename: '[name].js'
+path: path.resolve(__dirname, 'dist')
+}
+
+index.html:  script src -->index.js
 ```
 - 编译js、jsx
 ```
 { test: /\.jsx?$/, exclude: /node_modules/, use: 'babel-loader' }
+```
+- 编译ts、tsx-->读取tsconfig.js                      
+```
+{ test: /\.tsx?$/, use: 'awesome-typescript-loader' }
+
 ```
 - 编译scss、css
 ```
@@ -260,5 +244,37 @@ force: false,
 - https://fakefish.github.io/react-webpack-cookbook/index.html
 - https://mrshi.gitbooks.io/survivejs_webpack_chinese/chapter3-3.html
 - 打包原理: https://cnodejs.org/topic/5867bb575eac96bb04d3e301
-=======
->>>>>>> 55c1ffe256a501855f4d896c591f3be1a113c2f5
+
+
+## react-router引入
+- 路由基本
+```
+routes() {
+return <Route path='/' component={Index}>
+{RegisterRoute}
+</Route>
+}
+调用:
+<Provider store={store}>
+<Router history={hashHistory} routes={this.routes()}></Router>
+</Provider>
+```
+- 模块化路由按需加载(webpack会require独立分片文件, 实现按路由拆分文件)
+```
+const route =
+(<Route path="register"
+getComponent={(location:any, callback:any) => {
+require.ensure([], function (require: any) {
+const Index = require('./index')['default'];
+callback(null, Index.App);
+}, 'register');---> webpack: chunkFilename: [name]
+}}
+getChildRoutes={(location:any, callback: any) => {
+require.ensure([], function (require:any) {
+const Index = require('./index')['default'];
+callback(null, Index.routes);
+}, 'register');
+}}>
+</Route>);
+export default route;
+```
