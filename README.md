@@ -107,22 +107,24 @@ READNE.md
   ## webpack
  - 从0到1 webpack搭建过程
    - 解析依赖树入口文件、编译后文件
-   - 网页入口文件index.html
    - 编译 tsx、jsx、es6
-   - 编译 scss
+   - 编译 scss(内联样式)
    - 编译 font、image
    - 编译 json
-   - 模块化包装合并资源
    - 引入静态资源到相应 html 页面
+   - 分离
+     - css(css内联样式-外联样式)
+     - js (公共抽取)
+     - 代码分离(按需加载)
    - 文件 hash 后缀，处理缓存
    - 压缩 js、css
+   - 打包源码
    - 全局替换指定字符串
    - css 添加浏览器兼容前缀
-   - js源码打入
+   - 打包源码
    - 开发、测试、生产、英文版环境配置
    - html title、static path、favicon.ico动态配置
    - 按需加载合并 js、css
-   - css内嵌js-独立引入(遗留异步模块化)
    - 本地接口模拟服务
    - 语法检查: tslint、eslint
 
@@ -148,83 +150,120 @@ READNE.md
     { test: /\.tsx?$/, use: 'awesome-typescript-loader' }
     
   ```
-   - 编译scss、css
+   - 编译scss、css(内联样式)
   ```
-     {
-        test: /.css$/,
-        use: ExtractTextPlugin.extract({ ---> ExtractTextPlugin处理css分片
-           fallback: "style-loader",
-           use: "css-loader!sass-loader"
-        })
-     }
-     plugins引入: new ExtractTextPlugin('[name]-[chunkhash:8].css')
+   { test: /.s?[ac]ss$/, use:style-loader!css-loader!sass-loader},
   ```
-   - 分离css、js bundle
-     - webpack css: ExtractTextWebpackPlugin
-     - webpack js: CommonsChunkPlugin
-  ```
-       entry: {
-         vendor: ['react', 'react-redux', 'redux-thunk', 'react-router']
-       }
-       plugins定义:  new webpack.optimize.CommonsChunkPlugin({
-         name: ['vendor']
-       })
-  ```
-     - 代码动态分离：require.ensure()
+  - 编译font、image
+  
+```
+   { test: /\.(woff|woff2|eot|ttf|otf)$/, use: 'url-loader' },
+{ test: /\.(png|svg|jpg|gif)$/, use: 'url-loader' }
+```
+   - 编译 json
+    ```
+    { test: /\.json$/, use: 'json-loader' }
+    ```
+   - 引入静态资源到相应 html 页面
+```
+    new HtmlWebpackPlugin({
+    filename: 'index.html',
+    template: path.join(__dirname, 'index.html'),
+    chunks: ['index'],
+    inject: 'body'
+})
+```
+   - 分离
+```
+css:
+ {
+    test: /.s?[ac]ss$/,
+    use: ExtractTextPlugin.extract({
+        fallback: "style-loader",
+        use: ["css-loader", "sass-loader"]
+    })
+}
+new ExtractTextPlugin(
+{
+    'filename': '[name]-[chunkhash:8].css'
+})
+```
 
-   - 压缩 js、css
+```
+js:
+ entry: {
+   common: ['react', 'react-redux', 'redux-thunk', 'react-router']
+ }
+ new webpack.optimize.CommonsChunkPlugin({
+    name: ['common']
+ })
+```
+
+```
+代码分离:
+```
+   - 文件 hash 后缀，处理缓存(hash替换chunkhash)
+```
+output: {
+    filename: '[name]-[hash].min.js',
+    chunkFilename: '[name]-[chunkhash:8]-min.js',
+    path: path.resolve(__dirname, 'dist')
+}
+```
+  - 压缩 js、css(warning处理)
+```
+    new webpack.optimize.UglifyJsPlugin({
+    compress: {
+        warnings: false
+    },
+    sourceMap: true
+})
+```
+  - 打包源码
+```
+devtool: 'source-map',
+```
+  - 全局替换指定字符串
+```
+    new webpack.DefinePlugin({
+    'process.env': env
+})
+```
+ - css 添加浏览器兼容前缀(postcss-loader->autoprefixer)
+```
+   {
+    test: /.s?[ac]ss$/,
+        fallback: "style-loader",
+        use: ["css-loader", {
+            loader: 'postcss-loader',
+            options: {
+                plugins: function () {
+                    return [autoprefixer]
+                }
+            }
+        }, "sass-loader"]
+}
+```
+   - 开发、测试、生产、英文版环境配置、域名路径区分
+```
+   package.json:
+   "build": "cross-env NODE_ENV=production npm run compile"
+   
+   const staticPath = process.env.NODE_ENV ? '/' : 's1.*'
+   
+```
+   - html title、static path、favicon.ico动态配置
   ```
-      new webpack.optimize.UglifyJsPlugin({
-        compress: {
-          warnings: false
-        }
-      }),
-  ```
-   - md5 js、css
-  ```
-      filename: '[name]-[hash].min.js', -->entry中定义hash
-      chunkFilename: '[name].[chunkhash:8].js', -->分片文件hash
-  ```
-   - html template 动态生成
-  ```
-       index初始模板: <%= htmlWebpackPlugin.options.title %>
-       plugins:定义
-        new HtmlWebpackPlugin({
-          filename: 'index.html',
-          template: path.join(__dirname, 'index.html'),
-          chunks: ['vendor', 'index'],
-          inject: 'body',
-          title: '基础搭建',
-          jsPath: staticPath,
-          isColumbus: isColumbus,
-          locale: isColumbus ? 'en_US' : 'zh_CN',
-       }),
-  ```
-   - 环境变量featureFlag定义、替换-->代码中引用process.env. NODE_ENV替换isProduction
-  ```
-      new webpack.DefinePlugin({
-        'process.env': {
-           'NODE_ENV': isProduction
-        }
-      }),
-  ```
-   - 支持开发、测试、发布打包区分
-  ```
-     package.json添加
-        "compile": "rm -rf ./dist ./web-user.tar.gz && webpack --config webpack.config.js && tar -zcvf web-user.tar.gz ./dist ",
-        "build": "cross-env NODE_ENV=production npm run compile",
-        "build-columbus": "cross-env NODE_ENV=production COLUMBUS=true npm run compile"
-  ```
-   - 支持开发、测试、发布 静态资源前缀路径配置
-  ```
-      const staticPath = process.env.DEV_TEST === 'true' ? 's1.test.*' : 's1.*.*';
-      new HtmlWebpackPlugin({
-         staticPath: 'index.html'
-      })
-  ```
-   - 支持源码打包, chrome源码调试
-  ```
-      devtool: 'source-map',
+       index.html模板:  <%= htmlWebpackPlugin.options.title %>
+       
+new HtmlWebpackPlugin({
+      filename: 'index.html',
+      template: path.join(__dirname, 'index.html'),
+      chunks: ['vendor', 'index'],
+      inject: 'body',
+      title: '基础搭建',
+      jsPath: staticPath
+})
   ```
    - 支持静态资源打包copy
   ```
@@ -235,16 +274,6 @@ READNE.md
           force: false,
         }
   ```
-   - 支持变更热编译,浏览器自动刷新
-     ```
-       //TODO(zhoulj)
-     ```
-   - webpack详细讲解
-     - https://doc.webpack-china.org
-     - https://fakefish.github.io/react-webpack-cookbook/index.html
-     - https://mrshi.gitbooks.io/survivejs_webpack_chinese/chapter3-3.html
-     - 打包原理: https://cnodejs.org/topic/5867bb575eac96bb04d3e301
-     
 
 ## react-router引入
 - 路由基本
