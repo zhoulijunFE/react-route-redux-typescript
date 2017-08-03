@@ -3,13 +3,14 @@
 react + redux + react-route + typescript + webpack2
 
 - typeScript: 
-- JavaScript 的超集，支持所有的 JavaScript 语法
+  - JavaScript 的超集，支持所有的 JavaScript 语法
 ![image](https://3.bp.blogspot.com/-si6WAHEbA0g/Vz1PDHFPIOI/AAAAAAAADDs/i883_L0cVLQrLb-j7J6YPkwiM5MYWp4pwCK4B/s400/venn_typescript_es6_es5.png)
-- 强类型语言-静态类型检查
-- 添加class、interface、module、enum,
-- 限制存在范围：public、private、protected 
+  - 强类型语言-静态类型检查
+  - 添加class、interface、module、enum,
+  - 限制存在范围：public、private、protected 
 - webpack2: 
-- //待补充
+  - Tree Shaking
+  - https://juejin.im/post/591e5d9f44d904006ca39944
 
 ## 项目结构规划
 ```
@@ -136,7 +137,7 @@ query、options：为loaders提供额外的设置选项（可选）
   ```
   
   ```
-  编译 json:
+  编译 json:(webpack2默认支持)
   { test: /\.json$/, use: 'json-loader' }
   ```
   ```
@@ -181,7 +182,7 @@ new ExtractTextPlugin(
 })
 ```
 ```
-代码分离(按需加载):
+代码分离(按需加载):-->webpack2替换import
 require.ensure(
    dependencies: String[], 
    callback: function(require), 
@@ -228,6 +229,13 @@ new HtmlWebpackPlugin({
       staticPath: staticPath
 })
   ```
+  - 自动解析扩展名(默认js、json)
+```
+resolve: {
+    extensions: ['.ts', '.tsx', '.js', '.jsx']
+}
+```
+
   
 ## typescript
 - tsconfig.js: 存在目录是TypeScript的根目录(webpack awesome-typescript-loader读取)
