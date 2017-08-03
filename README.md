@@ -13,7 +13,6 @@ react + redux + react-route + typescript + webpack2
 
 ## 项目结构规划
 ```
-docs                               # 项目文档
 tests                              # 其他测试文件
 mock                               # mock
 node_modules                       #    
@@ -27,13 +26,13 @@ src                                # 项目源码
 |-- module                         # 项目模块(只有一个模块,这层目录可以省略)
 |   |-- components                 # component
 |   |   |-- *.tsx
+|   |-- views                      # view
+|   |   |-- *.tsx
 |   |-- actions                    # action
 |   |   |-- actionType.ts
 |   |   |-- action.ts         
 |   |-- reducers                   # reducer
 |   |   |-- index.ts
-|   |-- views                      # view
-|   |   |-- *.tsx
 |   |-- service                    # service
 |   |   |-- *.ts
 |   |-- statics                    # css、img
@@ -56,13 +55,13 @@ package.json
 READNE.md
 ```
 
-## 基本代码结构生成
+## 项目骨架
 -  https://github.com/Microsoft/TypeScript-React-Conversion-Guide
 
   ## webpack
  - 从0到1 webpack搭建过程
-   - 解析依赖树入口文件、编译后文件
-   - 动态引入静态资源到相应 html 页面
+   - 解析依赖树入口文件
+   - 编译后文件输出(hash输出)
    - loader
      - 编译 tsx、jsx、es6
      - 编译 scss(内联样式)
@@ -70,38 +69,30 @@ READNE.md
      - 编译 json
      - css 添加浏览器兼容前缀
    - 分离
-     - js (分离程序和公共库入口)
+     - js (应用、公共库分离)
      - css(css内联样式-外联样式)
      - 代码分离(按需加载)
-   - 文件 hash 后缀，处理缓存
    - 压缩 js、css
    - 打包源码
    - 全局替换指定字符串
    - 开发、测试、生产、英文版环境配置
    - html title、static path、favicon.ico动态配置
    - 按需加载合并 js、css
-   - 本地接口模拟服务
-   - 语法检查: tslint、eslint(未实现)
+   - 本地接口模拟服务(TODO)
+   - 语法检查: tslint、eslint(TODO)
 
-  - 解析入口文件、编译后文件
+  - 解析依赖树入口文件
 ```
   entry: {
    index: path.resolve(__dirname, './src/entry.tsx')
 }
-   
+```
+ - 编译后文件输出(hash输出)  
+```
  output: {
     filename: '[name].js'
     path: path.resolve(__dirname, 'dist')
  }
-```
-   - 动态引入静态资源到相应 html 页面
-```
-    new HtmlWebpackPlugin({
-    filename: 'index.html',
-    template: path.join(__dirname, 'index.html'),
-    chunks: ['index'],
-    inject: 'body'
-})
 ```
   - loader
 ```
@@ -167,7 +158,7 @@ query、options：为loaders提供额外的设置选项（可选）
    - 分离
    
 ```
-js:
+js(应用、公共库分离):
  entry: {
    vendor : ['react', 'react-redux', 'redux-thunk', 'react-router']
  }
@@ -176,7 +167,7 @@ js:
  })
 ```
 ```
-css:
+css(外联样式):
  {
     test: /.s?[ac]ss$/,
     use: ExtractTextPlugin.extract({
@@ -190,20 +181,12 @@ new ExtractTextPlugin(
 })
 ```
 ```
-代码分离:
+代码分离(按需加载):
 require.ensure(
    dependencies: String[], 
    callback: function(require), 
    chunkName: String
 )
-```
-   - 文件 hash 后缀，处理缓存(hash替换chunkhash)
-```
-output: {
-    filename: '[name]-[hash].min.js',
-    chunkFilename: '[name]-[chunkhash:8]-min.js',
-    path: path.resolve(__dirname, 'dist')
-}
 ```
   - 压缩 js、css(warning处理)
 ```
@@ -245,17 +228,7 @@ new HtmlWebpackPlugin({
       staticPath: staticPath
 })
   ```
-   - 支持静态资源打包copy
-  ```
-      new CopyPlugin([
-        {
-          from: vendorsPath,
-          to: './vendors/',
-          force: false,
-        }
-  ```
-   - 本地接口模拟服务(TODO)
-   
+  
 ## typescript
 - tsconfig.js: 存在目录是TypeScript的根目录(webpack awesome-typescript-loader读取)
 ```
@@ -277,7 +250,7 @@ new HtmlWebpackPlugin({
   "./src/**/*",               // **/递归匹配任意子目录, *或.*，那么仅有支持的文件扩展名类型被包含在内（.ts、.tsx、.d.ts)
   "./custom.d.ts"
 ],
-"exclude": [//排除文件,默认outDir、node_modules
+"exclude": [                  //排除文件,默认outDir、node_modules
  ]
 }
 ```
