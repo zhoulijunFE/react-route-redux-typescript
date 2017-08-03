@@ -6,7 +6,7 @@ react + redux + react-route + typescript + webpack2
 - JavaScript 的超集，支持所有的 JavaScript 语法
 ![image](https://3.bp.blogspot.com/-si6WAHEbA0g/Vz1PDHFPIOI/AAAAAAAADDs/i883_L0cVLQrLb-j7J6YPkwiM5MYWp4pwCK4B/s400/venn_typescript_es6_es5.png)
 - 强类型语言-静态类型检查
-- 添加class、interface、module、enum
+- 添加class、interface、module、enum,
 - 限制存在范围：public、private、protected 
 - webpack2: 
 - //待补充
@@ -70,8 +70,8 @@ READNE.md
      - 编译 json
      - css 添加浏览器兼容前缀
    - 分离
+     - js (分离程序和公共库入口)
      - css(css内联样式-外联样式)
-     - js (公共抽取)
      - 代码分离(按需加载)
    - 文件 hash 后缀，处理缓存
    - 压缩 js、css
@@ -102,6 +102,7 @@ READNE.md
     chunks: ['index'],
     inject: 'body'
 })
+```
   - loader
 ```
 test：loaders所处理的文件的扩展名的正则表达式（必须）
@@ -162,8 +163,18 @@ query、options：为loaders提供额外的设置选项（可选）
         }, "sass-loader"]
  }
  ```
-```
+
    - 分离
+   
+```
+js:
+ entry: {
+   vendor : ['react', 'react-redux', 'redux-thunk', 'react-router']
+ }
+ new webpack.optimize.CommonsChunkPlugin({
+    name: ['vendor ']
+ })
+```
 ```
 css:
  {
@@ -178,20 +189,13 @@ new ExtractTextPlugin(
     'filename': '[name]-[chunkhash:8].css'
 })
 ```
-
-```
-js:
- entry: {
-   common: ['react', 'react-redux', 'redux-thunk', 'react-router']
- }
- new webpack.optimize.CommonsChunkPlugin({
-    name: ['common']
- })
-```
-
 ```
 代码分离:
-require.ensure
+require.ensure(
+   dependencies: String[], 
+   callback: function(require), 
+   chunkName: String
+)
 ```
    - 文件 hash 后缀，处理缓存(hash替换chunkhash)
 ```
@@ -284,19 +288,7 @@ new HtmlWebpackPlugin({
 
 
 ## react-router引入
-- 路由基本
-```
-routes() {
-    return <Route path='/' component={Index}>
-         {RegisterRoute}
-    </Route>
-}
-调用:
-<Provider store={store}>
-    <Router history={hashHistory} routes={this.routes()}></Router>
-</Provider>
-```
-- 模块化路由按需加载(webpack会require独立分片文件, 实现按路由拆分文件)
+- 基于路由的分块
 
 ```
 react-route: getChildRoutes、getIndexRoute、getComponents异步方法
