@@ -87,6 +87,19 @@ READNE.md
   entry: {
    index: path.resolve(__dirname, './src/entry.tsx')
 }
+
+1）单入口： entry: './path/to/my/entry/file.js'
+2）应用、公共库分离：  
+    entry: {
+        index: path.resolve(__dirname, './src/entry.tsx'),
+        vendor: ['react', 'react-redux', 'redux-thunk', 'react-router']
+    }
+    CommonsChunkPlugin从中抽取vendor 相关模块，独立引入
+3）多页面入口：
+    entry: {
+        pageOne: './src/pageOne/index.js',
+        pageTwo: './src/pageTwo/index.js'
+    ｝
 ```
  - 编译后文件输出(hash输出)  
 ```
@@ -94,6 +107,15 @@ READNE.md
     filename: '[name].js'
     path: path.resolve(__dirname, 'dist')
  }
+
+1）多个入口起点，但只指定一个输出配置
+2）多入口、单入口
+    [id] 被 chunk 的 id 替换。
+    [name] 被 chunk 的 name 替换（或者，在 chunk 没有 name 时使用 id 替换）。
+    [hash] 被 compilation 生命周期的 hash 替换。
+    [chunkhash] 被 chunk 的 hash 替换。
+
+3）你用了哈希（[hash] 或 [chunkhash]），请确保模块具有一致的顺序。可以使用 OccurrenceOrderPlugin 或 recordsPath
 ```
   - loader
 ```

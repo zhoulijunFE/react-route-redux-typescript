@@ -1,11 +1,12 @@
-export function get(url: string, opts?: object) { // TODO(zhoulj) url encoding
+export function get(url: string, opts?: any) {
     // TODO(zhoulj) deal http repeat
     // TODO(zhoulj) add common loading
     // TODO(zhoulj) add common error tip
     // TODO(zhoulj) get add timestamp
+    // TODO(zhoulj) url encoding
     return new Promise((resolve, reject) => {
         fetch(url, {
-            credentials: 'include', // TODO(zhoulj) header detail
+            credentials: 'include',
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -32,7 +33,7 @@ export function get(url: string, opts?: object) { // TODO(zhoulj) url encoding
     })
 }
 
-export function post(url: string, opts?: object) {
+export function post(url: string, opts?: any) {
     return new Promise((resolve, reject) => {
         fetch(url, {
             credentials: 'include',
@@ -62,7 +63,7 @@ export function post(url: string, opts?: object) {
     })
 }
 
-export function put(url: string, opts: object) {
+export function put(url: string, opts?: any) {
     return new Promise((resolve, reject) => {
         fetch(url, {
             credentials: 'include',

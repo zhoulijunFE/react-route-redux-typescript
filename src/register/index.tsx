@@ -1,13 +1,15 @@
 import * as React from 'react';
 import * as  ReactDOM from 'react-dom';
 
-import routes from './routes';
-import App from './component/App';
-import * as reducer from './reducer/index';
+import Register from './views/Register';
+import locale from './locale';
+import RegisterRoutes from './RegisterRoutes';
+import * as reducer from './reducers/index';
 
 const Index = {
-    routes,
-    App,
-    reducer
+    locale,
+    reducer,
+    Register,
+    RegisterRoutes
 }
 export default Index;

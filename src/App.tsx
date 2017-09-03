@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { Router, Route, hashHistory, IndexRoute } from 'react-router';
+import { Router, Route, hashHistory, IndexRoute, IndexRedirect } from 'react-router';
 
 import { IntlProvider, addLocaleData } from 'react-intl';
 import { Provider } from 'react-redux';
@@ -8,41 +8,66 @@ import * as enLocaleDate from 'react-intl/locale-data/en';
 import * as zhLocaleDate from 'react-intl/locale-data/zh';
 addLocaleData([...enLocaleDate, ...zhLocaleDate]);
 
-import Index from './index';
-import RegisterRoute from './register/route';
+import RegisterRoute from './register/RegisterRoute';
 import * as storeUtil from './util/storeUtil';
-import zh_CN from './register/locale/zh_CN';
-import zh_TW from './register/locale/zh_TW';
-import en_US from './register/locale/en_US';
+import { locale } from './util/i18nUtil';
 
-import "./static/style/index.scss"
-
-const locales:any = {
-    'zh_CN': zh_CN,
-    'zh_TW': zh_TW,
-    'en_US': en_US
-}
 const store = storeUtil.configStore();
 
 export default class App extends React.Component<any, any>  {
-    routes() {
-        return <Route path='/' component={Index}>
-            {RegisterRoute}
-        </Route>
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            locales: {
+                'zh-CN': {},
+                'zh-TW': {},
+                'en-US': {}
+            }
+        }
+        this.onRouteLoad = this.onRouteLoad.bind(this);
     }
 
-    getMessage() {
-        // (TODO) 添加lang 、locale参数处理
-        return 'zh_CN';
+    private routes() {
+        return (
+            <Route path='/'>
+                <IndexRedirect to='register' />
+                {RegisterRoute(this.onRouteLoad)}
+            </Route>
+        )
     }
 
-    render() {
-        const locale = this.getMessage();
-        return (<IntlProvider locale={locale} messages={locales[locale]}>
-            <Provider store={store}>
-                <Router history={hashHistory} routes={this.routes()}>
-                </Router>
-            </Provider>
-        </IntlProvider>)
+    private onRouteLoad(routeLocale: any, routeReducer: any): void {
+        // (NOTE)zhoulj 动态路由国际化资源、reduer内存加载
+        routeLocale && this.mergeLocale(routeLocale);
+        routeReducer && this.mergeReducer(routeReducer);
+    }
+
+    private mergeLocale(routeLocale: any) {
+        const locales = this.state.locales;
+        this.setState({
+            locales: {
+                'zh-CN': Object.assign({}, locales['zh-CN'], routeLocale.zh_CN),
+                'zh-TW': Object.assign({}, locales['zh-CN'], routeLocale.zh_CN),
+                'en-US': Object.assign({}, locales['en-US'], routeLocale.en_US)
+            }
+        })
+    }
+
+    private mergeReducer(routeReducer: any) {
+        storeUtil.mergeStoreReducer(routeReducer);
+    }
+
+    public render() {
+        let { locales } = this.state;
+        return (
+            <IntlProvider locale={locale} messages={this.state.locales[locale]}>
+                <Provider store={store}>
+                    <Router
+                        history={hashHistory}
+                        routes={this.routes()}>
+                    </Router>
+                </Provider>
+            </IntlProvider>
+        )
     }
 }

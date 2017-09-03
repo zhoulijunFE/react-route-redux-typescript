@@ -14,7 +14,8 @@ function startMockServer(config) {
     var app = new (require('express'))();
     app.use('/', routers);
 
-    var server = http.createServer(app); //TODO(zhoulj) add remote https proxy
+    var server = http.createServer(app);
+    // TODO(zhoulj) add remote https proxy
     server.listen(mockConfig.port, mockConfig.host, function (error) {
         if (error) {
             console.error("MockServer error:", error);
